@@ -9,6 +9,7 @@ export type MoodOptionWithTimestamp = {
 };
 
 export type Game = {
-  result: 'win' | 'lose';
+  userName: string;
+  result: 'Win' | 'Lose';
   timestamp: number;
 };

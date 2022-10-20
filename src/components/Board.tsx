@@ -10,8 +10,11 @@ import {
   Modal,
   TouchableOpacity,
 } from 'react-native';
+import { Input } from '@rneui/themed';
 import { theme } from '../theme';
+import Icon from 'react-native-vector-icons/Fontisto';
 import Cell from './Cell';
+import { useAppContext } from '../App.provider';
 
 const background = require('../../assets/bg.jpeg');
 
@@ -41,8 +44,14 @@ export const Board: React.FC = () => {
   const [indicatorLoading, setIndicatorLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState<string>('');
+  const { handleSaveGame, games } = useAppContext();
 
   const onMove = (x: number, y: number): void => {
+    // If the name is not exist
+    if (!userName) {
+      setModalVisible(true);
+      return;
+    }
     // If the square is exist
     if (board[x][y] !== '') {
       return;
@@ -65,23 +74,42 @@ export const Board: React.FC = () => {
     if (lastMove.x !== undefined && lastMove.y !== undefined) {
       // Find the winner
       const result = getResult();
-      if (result === 'x' || result === 'o') {
-        Alert.alert('Result', `${result.toLocaleUpperCase()} is the winner`, [
-          {
-            text: 'Reset',
-            onPress: resetGame,
-          },
-        ]);
-        return;
-      }
+      if (result) {
+        let resultMsg = '';
+        switch (result) {
+          case 'x':
+            resultMsg = 'You are the winner';
+            break;
+          case 'o':
+            resultMsg = 'Computer is the winner';
+            break;
+          case 'draw':
+            resultMsg = "It's a draw";
+            break;
 
-      if (result === 'draw') {
-        Alert.alert('Result', "It's a draw", [
+          default:
+            break;
+        }
+
+        Alert.alert('Result', resultMsg, [
           {
             text: 'Reset',
             onPress: resetGame,
           },
+          {
+            text: 'New Game',
+            onPress: playNewGame,
+          },
         ]);
+
+        handleSaveGame({
+          userName,
+          result: result === 'x' ? 'Win' : 'Lose',
+          timestamp: Date.now(),
+        });
+
+        console.log(games);
+
         return;
       }
     }
@@ -146,7 +174,9 @@ export const Board: React.FC = () => {
   };
 
   const getBotMove = () => {
+    setIndicatorLoading(true);
     const possibleOptions: MoveOption[] = [];
+
     board.forEach((row, rowIndex) => {
       row.forEach((cell, columnIndex) => {
         if (cell === '') {
@@ -158,7 +188,6 @@ export const Board: React.FC = () => {
     const randomMove =
       possibleOptions[getRandom(0, possibleOptions.length - 1)];
 
-    setIndicatorLoading(true);
     setTimeout(() => {
       onMove(randomMove.x, randomMove.y);
       setIndicatorLoading(false);
@@ -174,59 +203,95 @@ export const Board: React.FC = () => {
     setCount(0);
     setLastMove({ x: undefined, y: undefined });
     setNextTurn('x');
+    setUserName('');
   };
 
-  const submitModal = () => {};
+  const playNewGame = () => {
+    setBoard([
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', ''],
+    ]);
+    setCount(0);
+    setLastMove({ x: undefined, y: undefined });
+    setNextTurn('x');
+  };
 
   return (
-    <ImageBackground style={styles.container} source={background}>
-      <View style={styles.heading}>
-        <Text style={styles.headingTitle}>
-          {(count > 0 && `Next Turn: ${nextTurn.toUpperCase()}`) ||
-            "Let's start"}
-        </Text>
-        <ActivityIndicator
-          style={styles.headingIndicator}
-          size="large"
-          color="#fff"
-          animating={indicatorLoading}
-        />
-      </View>
-      <View style={styles.board}>
-        {board.map((row, rowIndex) => (
-          <View key={`row-${rowIndex}`} style={styles.row}>
-            {row.map((cell, columnIndex) => (
-              <Cell
-                key={`col-${columnIndex}`}
-                cell={cell}
-                onPress={() => onMove(rowIndex, columnIndex)}
-              />
-            ))}
-          </View>
-        ))}
-      </View>
-      <Pressable
-        style={styles.startButtonBox}
-        onPress={() => setModalVisible(true)}>
-        <Text style={styles.button}>Start</Text>
-      </Pressable>
-
-      {/* Modal for inputting name */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <TouchableOpacity style={styles.buttonClose} />
-            <Text style={styles.modalText}>Hello World!</Text>
-            <Pressable onPress={submitModal}>
-              <Text style={styles.button}>OK</Text>
-            </Pressable>
-          </View>
+    <ImageBackground source={background}>
+      <View
+        style={styles.container}
+        pointerEvents={indicatorLoading ? 'none' : 'auto'}>
+        <Text style={styles.mainTitle}>{`Hello ${userName}`}</Text>
+        <View style={styles.header}>
+          <ActivityIndicator
+            style={styles.headerIndicator}
+            size="large"
+            color="#fff"
+            animating={indicatorLoading}
+          />
+          <Text style={styles.subTitle}>
+            {userName && nextTurn === 'x' && 'Your turn'}
+            {userName && nextTurn === 'o' && 'Computer turn'}
+          </Text>
         </View>
-      </Modal>
+        <View style={styles.board}>
+          {board.map((row, rowIndex) => (
+            <View key={`row-${rowIndex}`} style={styles.row}>
+              {row.map((cell, columnIndex) => (
+                <Cell
+                  key={`col-${columnIndex}`}
+                  cell={cell}
+                  onPress={() => onMove(rowIndex, columnIndex)}
+                />
+              ))}
+            </View>
+          ))}
+        </View>
+        {!userName ? (
+          <Pressable
+            style={styles.startButtonBox}
+            onPress={() => setModalVisible(true)}>
+            <Text style={styles.button}>Start</Text>
+          </Pressable>
+        ) : (
+          <Pressable style={styles.startButtonBox} onPress={resetGame}>
+            <Text style={styles.button}>Reset</Text>
+          </Pressable>
+        )}
+
+        {/* Modal for inputting name */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+            setUserName('');
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                style={styles.buttonClose}
+                onPress={() => {
+                  setModalVisible(false);
+                  setUserName('');
+                }}>
+                <Icon name="close-a" size={18} />
+              </TouchableOpacity>
+              <Input
+                placeholder="Enter your name"
+                value={userName}
+                onChangeText={(text: string) => setUserName(text)}
+                containerStyle={styles.modalInput}
+              />
+              <Pressable onPress={() => setModalVisible(false)}>
+                <Text style={styles.button}>OK</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </ImageBackground>
   );
 };
@@ -235,26 +300,34 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: '100%',
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  heading: {
+  mainTitle: {
     position: 'absolute',
-    top: 150,
-    width: '100%',
-    textAlign: 'center',
-  },
-  headingTitle: {
+    top: 140,
     fontSize: 20,
     fontFamily: theme.fontFamilyRegular,
     color: theme.colorWhite,
     textAlign: 'center',
   },
-  headingIndicator: {
+  header: {
     position: 'absolute',
-    top: 0,
-    right: 20,
+    top: 180,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 30,
+    width: '100%',
+    textAlign: 'right',
+  },
+  subTitle: {
+    fontSize: 14,
+    fontFamily: theme.fontFamilyRegular,
+    color: theme.colorWhite,
+  },
+  headerIndicator: {
+    marginRight: 10,
   },
   startButtonBox: {
     position: 'absolute',
@@ -281,7 +354,7 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.9)',
   },
   modalView: {
     position: 'relative',
@@ -299,10 +372,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  modalInput: {
+    backgroundColor: theme.colorWhite,
+    paddingTop: 5,
+    paddingBottom: 0,
+    paddingHorizontal: 10,
+  },
   buttonClose: {
     position: 'absolute',
-    top: 5,
-    right: 5,
+    top: 10,
+    right: 10,
+    zIndex: 10,
   },
   textStyle: {
     color: 'white',

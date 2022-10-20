@@ -24,13 +24,22 @@ export const GameItemRow: React.FC<GameItemRowProps> = ({ item }) => {
   }, [appContext, item]);
 
   return (
-    <View style={styles.moodItem}>
-      <View style={styles.iconAndDescription}>
-        <Text style={styles.moodDescription}>{item.result}</Text>
+    <View style={styles.gameItem}>
+      <View>
+        <Text
+          style={[
+            styles.result,
+            item.result === 'Win' ? styles.win : styles.lose,
+          ]}>
+          {item.result}
+        </Text>
       </View>
-      <Text style={styles.moodDate}>
-        {format(new Date(item.timestamp), "dd MMM, yyyy 'at' h:mmaaa")}
-      </Text>
+      <View>
+        <Text style={styles.userName}>{item.userName}</Text>
+        <Text style={styles.date}>
+          {format(new Date(item.timestamp), "dd MMM, yyyy 'at' h:mmaaa")}
+        </Text>
+      </View>
       <Pressable onPress={handleDelete}>
         <Text style={styles.deleteText}>Delete</Text>
       </Pressable>
@@ -39,32 +48,45 @@ export const GameItemRow: React.FC<GameItemRowProps> = ({ item }) => {
 };
 
 const styles = StyleSheet.create({
-  moodValue: {
+  date: {
     textAlign: 'center',
-    fontSize: 40,
-    marginRight: 10,
-  },
-  moodDate: {
-    textAlign: 'center',
-    color: theme.colorYellow,
+    color: theme.colorGrey,
     fontFamily: theme.fontFamilyRegular,
+    fontStyle: 'italic',
+    fontSize: 12,
   },
-  moodItem: {
+  gameItem: {
     backgroundColor: 'white',
     marginBottom: 10,
     padding: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+
+    elevation: 3,
   },
-  moodDescription: {
-    fontSize: 18,
-    color: theme.colorWhite,
+  result: {
+    fontSize: 22,
     fontFamily: theme.fontFamilyRegular,
   },
-  iconAndDescription: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  win: {
+    color: theme.colorGreen,
+  },
+  lose: {
+    color: theme.colorRed,
+  },
+  userName: {
+    fontSize: 18,
+    textAlign: 'center',
+    fontFamily: theme.fontFamilyRegular,
   },
   deleteText: {
     fontFamily: theme.fontFamilyRegular,
