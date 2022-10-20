@@ -7,6 +7,8 @@ import {
   Pressable,
   Alert,
   ActivityIndicator,
+  Modal,
+  TouchableOpacity,
 } from 'react-native';
 import { theme } from '../theme';
 import Cell from './Cell';
@@ -37,6 +39,7 @@ export const Board: React.FC = () => {
     y: undefined,
   });
   const [indicatorLoading, setIndicatorLoading] = useState<boolean>(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState<string>('');
 
   const onMove = (x: number, y: number): void => {
@@ -173,6 +176,8 @@ export const Board: React.FC = () => {
     setNextTurn('x');
   };
 
+  const submitModal = () => {};
+
   return (
     <ImageBackground style={styles.container} source={background}>
       <View style={styles.heading}>
@@ -200,9 +205,28 @@ export const Board: React.FC = () => {
           </View>
         ))}
       </View>
-      <Pressable style={styles.clearButtonBox} onPress={resetGame}>
-        <Text style={styles.clearButton}>Clear</Text>
+      <Pressable
+        style={styles.startButtonBox}
+        onPress={() => setModalVisible(true)}>
+        <Text style={styles.button}>Start</Text>
       </Pressable>
+
+      {/* Modal for inputting name */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity style={styles.buttonClose} />
+            <Text style={styles.modalText}>Hello World!</Text>
+            <Pressable onPress={submitModal}>
+              <Text style={styles.button}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 };
@@ -232,15 +256,15 @@ const styles = StyleSheet.create({
     top: 0,
     right: 20,
   },
-  clearButtonBox: {
+  startButtonBox: {
     position: 'absolute',
-    bottom: 50,
-    backgroundColor: theme.colorBlue,
-    paddingHorizontal: 30,
-    paddingVertical: 10,
-    borderRadius: 10,
+    bottom: 100,
   },
-  clearButton: {
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    backgroundColor: theme.colorBlue,
     color: theme.colorWhite,
     fontFamily: theme.fontFamilyRegular,
     fontSize: 14,
@@ -253,5 +277,40 @@ const styles = StyleSheet.create({
   row: {
     flex: 1,
     flexDirection: 'row',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modalView: {
+    position: 'relative',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonClose: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
