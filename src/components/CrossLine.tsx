@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-const Cross = () => {
+const CrossLine = () => {
   return (
     <View style={styles.cross}>
       <View style={styles.crossLine} />
@@ -16,8 +16,8 @@ const styles = StyleSheet.create({
   },
   crossLine: {
     position: 'absolute',
-    left: '48%',
-    width: 10,
+    left: '45%',
+    width: 5,
     height: '100%',
     backgroundColor: 'white',
     borderRadius: 5,
@@ -36,4 +36,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Cross;
+export default CrossLine;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
+import { Text } from 'react-native-svg';
 import CrossLine from './CrossLine';
 
 type Props = {
@@ -7,8 +8,7 @@ type Props = {
   onPress: () => void;
 };
 
-const Cell = (props: Props) => {
-  const { cell, onPress } = props;
+const Cell = ({ cell, onPress }: Props) => {
   return (
     <Pressable onPress={() => onPress()} style={styles.cell}>
       {cell === 'o' && <View style={styles.circle} />}
@@ -19,9 +19,8 @@ const Cell = (props: Props) => {
 
 const styles = StyleSheet.create({
   cell: {
-    width: 100,
-    height: 100,
     flex: 1,
+    padding: 10,
   },
   circle: {
     flex: 1,
@@ -29,9 +28,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     margin: 10,
-
-    borderWidth: 10,
-    borderColor: 'white',
+    borderWidth: 5,
+    borderColor: 'yellow',
   },
 });
 
