@@ -44,7 +44,7 @@ export const Board: React.FC = () => {
   const [indicatorLoading, setIndicatorLoading] = useState<boolean>(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [userName, setUserName] = useState<string>('');
-  const { handleSaveGame, games } = useAppContext();
+  const { handleSaveGame } = useAppContext();
 
   const onMove = (x: number, y: number): void => {
     // If the name is not exist
@@ -107,8 +107,6 @@ export const Board: React.FC = () => {
           result: result === 'x' ? 'Win' : 'Lose',
           timestamp: Date.now(),
         });
-
-        console.log(games);
 
         return;
       }

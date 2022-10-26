@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { Text } from 'react-native-svg';
 import CrossLine from './CrossLine';
 
 type Props = {
